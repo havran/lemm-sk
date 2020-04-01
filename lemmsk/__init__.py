@@ -3,10 +3,9 @@ import marisa_trie
 import codecs
 from os import path
 import sys
-reload(sys)
-sys.setdefaultencoding('utf8')
 
 here = path.abspath(path.dirname(__file__))
+PY2 = sys.version_info[0] == 2
 
 
 def build_trie(file):
@@ -26,7 +25,7 @@ _trie = marisa_trie.BytesTrie()
 _trie_path = path.abspath('{}/data/lemmatization-sk.marisa'.format(here))
 try:
     _trie.load(_trie_path)
-except Exception, e:
+except Exception as e:
     import warnings
     warnings.warn("Trie could not be loaded from '{}'. Perhaps it is not"
                   "installed?".format(_trie_path))
@@ -34,12 +33,12 @@ _lemmas = set([x[1] for x in _trie.items()])
 
 
 def is_lemma(word):
-    return word in _lemmas
+    return word in _lemmas if PY2 else word.encode('utf-8') in _lemmas
 
 
 def lemmatize(word):
     try:
-        return _trie[unicode(word)][0]
+        return _trie[str(word)][0] if PY2 else _trie[str(word)][0].decode('utf-8')
     except Exception:
         return word
 
